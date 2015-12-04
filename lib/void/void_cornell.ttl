@@ -1,0 +1,36 @@
+@prefix : <http://draft.ld4l.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://draft.ld4l.org/cornell> a void:Dataset ;
+    foaf:homepage <https://www.ld4l.org/> ;
+    dcterms:isPartOf <http://draft.ld4l.org> ;
+    dcterms:title "Draft of LD4L data for Cornell University Library" ;
+    dcterms:description "Draft of LD4L data for Cornell University Library" ;
+    dcterms:creator :CornellLib ;
+    dcterms:created "2015-12-13"^^xsd:date ;
+    dcterms:modified "2015-12-13"^^xsd:date ;
+    dcterms:subject <http://dbpedia.org/page/Library_science> ;
+    dcterms:subject <http://dbpedia.org/page/Library_catalog> ;
+    dcterms:subject <http://openskos.memorix.nl/concepts/amc/keywords/AMC02009> ;
+    dcterms:rights <http://draft.ld4l.org/cornell/termsOfUse> ;
+    dcterms:license <http://creativecommons.org/licenses/by/4.0> ;
+    void:triples 850146902 ;
+    void:classes 19 ;
+    void:properties 35;
+    .
+
+:CornellLib a foaf:Organization ;
+    rdfs:label "Cornell University Library" ;
+    foaf:homepage <https://www.library.cornell.edu/> ;
+    .
+
+
+#
+# Each resource will have this triple added...
+#
+# <http://draft.ld4l.org/cornell/000000036-1agent46> void:inDataset <http://draft.ld4l.org/cornell> .
+#

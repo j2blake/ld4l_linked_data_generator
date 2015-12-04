@@ -1,0 +1,27 @@
+#! /usr/bin/env ruby
+
+=begin rdoc
+--------------------------------------------------------------------------------
+
+Generate files of Linked Open Data from the triple-store, for the LOD server. 
+The files are created in a PairTree directory, in N3 format. When servicing a 
+request, the server will read the file into a graph, add document triples, and
+serialize it to the requested format.
+
+--------------------------------------------------------------------------------
+
+Usage: ld4l_create_lod_files <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>
+
+--------------------------------------------------------------------------------
+=end
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'ld4l_link_data_generator.rb'
+
+#
+# ---------------------------------------------------------
+# MAIN ROUTINE
+# ---------------------------------------------------------
+#
+
+Ld4lLinkDataGenerator::LinkedDataCreator.new.run

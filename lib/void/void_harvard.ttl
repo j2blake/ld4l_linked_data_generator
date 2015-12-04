@@ -1,0 +1,22 @@
+@prefix : <http://draft.ld4l.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://draft.ld4l.org/harvard> a void:Dataset ;
+# Analogous to Cornell example.
+    .
+
+:HarvardLibIL a foaf:Organization ;
+    rdfs:label "Harvard Library Innovation Lab" ;
+    foaf:homepage <http://librarylab.law.harvard.edu/> ;
+    .
+
+
+#
+# Each resource will have this triple added...
+#
+# <http://draft.ld4l.org/harvard/000000036-1agent46> void:inDataset <http://draft.ld4l.org/harvard> .
+#

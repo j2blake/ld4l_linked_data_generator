@@ -1,0 +1,25 @@
+@prefix : <http://draft.ld4l.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+<http://draft.ld4l.org> a void:Dataset ;
+    foaf:homepage <https://www.ld4l.org/> ;
+    dcterms:title "Draft of combined LD4L data." ;
+    dcterms:description "Draft of combined LD4L data." ;
+    dcterms:publisher :LD4L ;
+    void:feature <http://www.w3.org/ns/formats/N3> ;
+    void:feature <http://www.w3.org/ns/formats/N-Triples> ;
+    void:feature <http://www.w3.org/ns/formats/RDF_JSON> ;
+    void:feature <http://www.w3.org/ns/formats/RDF_XML> ;
+    void:feature <http://www.w3.org/ns/formats/Turtle> ;
+    void:subset :cornell ;
+    void:subset :harvard ;
+    void:subset :stanford ;
+    .
+    
+:LD4L a foaf:Organization ;
+    rdfs:label "Linked Data for Libraries" ;
+    foaf:homepage <https://www.ld4l.org/> ;
+    .
