@@ -1,0 +1,1 @@
+Creates linked data in static files from the LD4L triple-store.
