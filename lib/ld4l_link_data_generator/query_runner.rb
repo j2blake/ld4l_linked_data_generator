@@ -33,9 +33,11 @@ module Ld4lLinkDataGenerator
     end
 
     def select(ts)
+      result = nil
       ts.sparql_query(@query) do |resp|
-        return parse_response(resp)
+        result = parse_response(resp)
       end
+      result
     end
 
     def parse_response(resp)
