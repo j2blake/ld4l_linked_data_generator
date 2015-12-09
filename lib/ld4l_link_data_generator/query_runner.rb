@@ -51,9 +51,11 @@ module Ld4lLinkDataGenerator
     end
 
     def construct(ts)
+      result = nil
       ts.sparql_query(@query, 'text/plain') do |resp|
-        return RDF::Graph.new << RDF::Reader.for(:ntriples).new(resp.body)
+        result = RDF::Graph.new << RDF::Reader.for(:ntriples).new(resp.body)
       end
+      result
     end
   end
 end
