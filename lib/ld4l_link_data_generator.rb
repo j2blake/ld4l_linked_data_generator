@@ -9,6 +9,7 @@ require 'rdf'
 require 'rdf/raptor'
 
 require "ld4l_link_data_generator/bookmark"
+require "ld4l_link_data_generator/counts"
 require "ld4l_link_data_generator/linked_data_creator"
 require "ld4l_link_data_generator/query_runner"
 require "ld4l_link_data_generator/report"

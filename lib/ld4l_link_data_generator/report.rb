@@ -43,6 +43,10 @@ module Ld4lLinkDataGenerator
       logit "#{@main_routine} #{args.join(' ')}"
     end
 
+    def record_counts(counts)
+      logit "%{name}: %{triples} triples, %{subjects} subjects." % counts.values
+    end
+
     def wrote_it(uri, graph)
       #  Something that the URI processor will do.
       @good_uri_count += 1

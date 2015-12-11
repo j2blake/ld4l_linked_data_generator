@@ -110,6 +110,8 @@ module Ld4lLinkDataGenerator
       connect_pairtree
       initialize_bookmark
       trap_control_c
+      
+      @report.record_counts(Counts.new(@ts))
     end
 
     def run
