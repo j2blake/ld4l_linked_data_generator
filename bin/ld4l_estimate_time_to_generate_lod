@@ -1,0 +1,24 @@
+#! /usr/bin/env ruby
+
+=begin rdoc
+--------------------------------------------------------------------------------
+
+For now, just try to figure out how many LOD files we will generate.
+
+--------------------------------------------------------------------------------
+
+Usage: ld4l_estimate_time_to_generate
+
+--------------------------------------------------------------------------------
+=end
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'ld4l_link_data_generator.rb'
+
+#
+# ---------------------------------------------------------
+# MAIN ROUTINE
+# ---------------------------------------------------------
+#
+
+Ld4lLinkDataGenerator::Estimator.new.run
