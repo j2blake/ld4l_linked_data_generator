@@ -56,7 +56,8 @@ module Ld4lLinkDataGenerator
     end
 
     def report_progress()
-      puts("Find URIs:, offset: %d, found: %d" % [@offset, @found])
+      time = Time.new.strftime('%Y-%m-%d %H:%M:%S') 
+      puts("%s Find URIs:, offset: %d, found: %d" % [time, @offset, @found])
     end
 
     def run
