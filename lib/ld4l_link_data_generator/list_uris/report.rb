@@ -49,7 +49,7 @@ module Ld4lLinkDataGenerator
 
       def log_average_first_pass_files(filename)
         elapsed = Time.now - @first_pass_recent
-        logit ("                 %d files. Average of %6.3f seconds/file. %s" % [@first_pass_count, (elapsed/@first_pass_count), filename])
+        logit ("                 %d files. Average of %6.3f seconds/file. %s" % [@first_pass_count, (elapsed/100), filename])
         @first_pass_recent = Time.now
       end
 
@@ -57,7 +57,18 @@ module Ld4lLinkDataGenerator
         elapsed = Time.now - @first_pass_start
         logit "Stop first pass: #{@first_pass_count} files in #{elapsed} seconds."
         logit ("                 Average of %6.3f seconds/file." % (elapsed/@first_pass_count))
-        log_average_first_pass_files
+      end
+
+      def merge_pass_start(source, target)
+        logit "Start merge pass: #{File.basename(source)} to #{File.basename(target)}."
+      end
+
+      def merge_pass_stop(batches)
+        logit "Stop merge pass: #{batches} batches."
+      end
+
+      def merge_passes_summary(last_file)
+        logit "Merge passes complete: merged file is: #{last_file}"
       end
 
       def close()

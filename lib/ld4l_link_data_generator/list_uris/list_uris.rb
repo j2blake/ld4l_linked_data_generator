@@ -27,9 +27,9 @@ module Ld4lLinkDataGenerator
     class ListUris
       USAGE_TEXT = 'Usage: ld4l_list_uris <source_dir> <output_dir> [OVERWRITE] <report_file> [REPLACE]'
       LOCAL_URI_PREFIX = 'http://ld4l.library.cornell.edu/'
-#      LOCAL_URI_PREFIX = 'http://draft.ld4l.org/'
-      MERGE_BATCH_SIZE = 100
-      FINAL_FILE_SIZE = 1000000
+      #      LOCAL_URI_PREFIX = 'http://draft.ld4l.org/'
+      MERGE_BATCH_SIZE = 40
+      SPLIT_FILE_SIZE = 100000
       def process_arguments()
         args = ARGV
         @overwrite = args.delete('OVERWRITE')
@@ -58,11 +58,11 @@ module Ld4lLinkDataGenerator
       def first_pass
         @report.first_pass_start
 
-        @first_pass_dir = File.join(@output_dir, 'first_pass') 
+        @first_pass_dir = File.join(@output_dir, 'first_pass')
         Dir.mkdir(@first_pass_dir) unless File.exist?(@first_pass_dir)
-        
+
         Find.find(@source_dir) do |path|
-          if File.file?(path) && path.end_with?('.nt')
+          if File.file?(path) && path.end_with?('.nt') && !path.start_with?('.')
             process_first_pass_file(path)
           end
         end
@@ -75,35 +75,58 @@ module Ld4lLinkDataGenerator
         `awk '/^\\S*#{pattern_escape(LOCAL_URI_PREFIX)}/ { gsub(/[<>]/, "", $1); print $1}' #{path} | sort -u > #{output_file}`
         @report.first_pass_file(new_filename)
       end
-      
-      def merge_pass
+
+      def merge_passes
         dir_index = 1
-        source_dir = @first_pass_dir
-        target_dir = merge_target_dir(dir_index)
-        
-=begin
-        starting from the first_pass directory, merge up to 40 files at once, into the merge1 directory
-        then from merge1, merge up to 40 files at once into the merge2 directory.
-        when we only have one remaining file, note the path
-=end
-        logit ("BOGUS merge_pass")
+        source = @first_pass_dir
+        target = merge_target_dir(dir_index)
+        loop do
+          how_many_batches = merge_pass(source, target)
+          break if how_many_batches <= 1
+          source = target
+          dir_index += 1
+          target = merge_target_dir(dir_index)
+        end
+        @last_merge_file = merge_target_file(target, 1)
+        @report.merge_passes_summary(@last_merge_file[@output_dir.size..-1])
       end
-      
+
+      def merge_pass(source, target)
+        @report.merge_pass_start(source, target)
+        batch_index = 0
+        Dir.mkdir(target) unless File.exist?(target)
+        Dir.chdir(source) do |d|
+          Dir.entries(source).reject {|fn| fn.start_with?('.')}.each_slice(MERGE_BATCH_SIZE) do |slice|
+            batch_index += 1
+            target_file = merge_target_file(target, batch_index)
+            `sort -m -u #{slice.join(' ')} > #{target_file}`
+          end
+        end
+        @report.merge_pass_stop(batch_index)
+        batch_index
+      end
+
       def merge_target_dir(index)
-        File.join(@output_dir, 'merge_' + index)
+        File.join(@output_dir, "merge_#{index}")
       end
-      
+
+      def merge_target_file(dir, index)
+        File.join(dir, "merge_output_#{index}")
+      end
+
       def split
-=begin
-        create the sorted_split directory, split the files into it.
-=end
-        logit ("BOGUS split")
+        split_dir = File.join(@output_dir, 'splits')
+        Dir.mkdir(split_dir) unless File.exist?(split_dir)
+        Dir.chdir(split_dir) do
+          `split -a4 -l #{SPLIT_FILE_SIZE} #{@last_merge_file} split_`
+        end
+        @report.logit("Split pass complete")
       end
-      
+
       def report
-        logit ("BOGUS REPORT")
+        @report.logit ("BOGUS REPORT")
       end
-      
+
       def pattern_escape(string)
         string.gsub('/', '\\/').gsub('.', '\\.')
       end
@@ -113,7 +136,7 @@ module Ld4lLinkDataGenerator
           process_arguments
           prepare_target
           first_pass
-          merge_pass
+          merge_passes
           split
           report
         rescue UserInputError, IllegalStateError
