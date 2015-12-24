@@ -57,6 +57,10 @@ module Ld4lLinkDataGenerator
 
       def first_pass
         @report.first_pass_start
+
+        @first_pass_dir = File.join(@output_dir, 'first_pass') 
+        Dir.mkdir(@first_pass_dir) unless File.exist?(@first_pass_dir)
+        
         Find.find(@source_dir) do |path|
           if File.file?(path) && path.end_with?('.nt')
             process_first_pass_file(path)
@@ -66,8 +70,6 @@ module Ld4lLinkDataGenerator
       end
 
       def process_first_pass_file(path)
-        @first_pass_dir = File.join(@output_dir, 'first_pass') 
-        Dir.mkdir(@first_pass_dir) unless File.exist?(@first_pass_dir)
         new_filename = path[@source_dir.size..-1].gsub('/', '__')
         output_file = File.join(@first_pass_dir, new_filename)
         `awk '/^\\S*#{pattern_escape(LOCAL_URI_PREFIX)}/ { gsub(/[<>]/, "", $1); print $1}' #{path} | sort -u > #{output_file}`
@@ -75,12 +77,20 @@ module Ld4lLinkDataGenerator
       end
       
       def merge_pass
+        dir_index = 1
+        source_dir = @first_pass_dir
+        target_dir = merge_target_dir(dir_index)
+        
 =begin
         starting from the first_pass directory, merge up to 40 files at once, into the merge1 directory
         then from merge1, merge up to 40 files at once into the merge2 directory.
         when we only have one remaining file, note the path
 =end
         logit ("BOGUS merge_pass")
+      end
+      
+      def merge_target_dir(index)
+        File.join(@output_dir, 'merge_' + index)
       end
       
       def split

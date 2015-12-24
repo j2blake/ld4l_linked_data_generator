@@ -34,27 +34,30 @@ module Ld4lLinkDataGenerator
 
       def first_pass_start()
         @first_pass_start = Time.now
+        @first_pass_recent = Time.now
         @first_pass_count = 0
         logit "Start first pass."
       end
 
       def first_pass_file(filename)
         @first_pass_count += 1
-#        logit "    processed #{filename}"
+        #        logit "    processed #{filename}"
         if @first_pass_count % 100 == 0
-          log_average_first_pass_files
+          log_average_first_pass_files(filename)
         end
+      end
+
+      def log_average_first_pass_files(filename)
+        elapsed = Time.now - @first_pass_recent
+        logit ("                 %d files. Average of %6.3f seconds/file. %s" % [@first_pass_count, (elapsed/@first_pass_count), filename])
+        @first_pass_recent = Time.now
       end
 
       def first_pass_stop()
         elapsed = Time.now - @first_pass_start
         logit "Stop first pass: #{@first_pass_count} files in #{elapsed} seconds."
-        log_average_first_pass_files
-      end
-
-      def log_average_first_pass_files
-        elapsed = Time.now - @first_pass_start
         logit ("                 Average of %6.3f seconds/file." % (elapsed/@first_pass_count))
+        log_average_first_pass_files
       end
 
       def close()
