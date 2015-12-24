@@ -72,7 +72,7 @@ module Ld4lLinkDataGenerator
       def process_first_pass_file(path)
         new_filename = path[@source_dir.size..-1].gsub('/', '__')
         output_file = File.join(@first_pass_dir, new_filename)
-        `awk '/^\\S*#{pattern_escape(LOCAL_URI_PREFIX)}/ { gsub(/[<>]/, "", $1); print $1}' #{path} | sort -u > #{output_file}`
+        `awk '/^<#{pattern_escape(LOCAL_URI_PREFIX)}/ { gsub(/[<>]/, "", $1); print $1}' #{path} | sort -u > #{output_file}`
         @report.first_pass_file(new_filename)
       end
 
