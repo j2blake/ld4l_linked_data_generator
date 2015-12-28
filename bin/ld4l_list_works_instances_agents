@@ -1,0 +1,47 @@
+#! /usr/bin/env ruby
+
+=begin rdoc
+--------------------------------------------------------------------------------
+
+Generate a group of files that contain all of the URIs that we want to index.
+
+Start with a directory-tree of N-Triples files. Do each institution separately.
+Assume that there are no URIs in common.
+
+First: process each file, trimming each line to just the subject URI. Include 
+only URIs for Works, Instances and Agents, sort and remove duplicates.
+
+Next: do a successive operation merging batches of files until only one large 
+file remains.
+
+Finally, split the big file into smaller segments. If requested, partition the
+split segments into multiple sub-directories.
+
+--------------------------------------------------------------------------------
+
+Usage: ld4l_list_works_instances_agents <source_dir> <output_dir> [RESTART] <report_file> [REPLACE] [PARTITION <ways>]
+
+--------------------------------------------------------------------------------
+=end
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'ld4l_link_data_generator.rb'
+
+#
+# ---------------------------------------------------------
+# MAIN ROUTINE
+# ---------------------------------------------------------
+#
+#works_pattern = pattern_escape("http://draft.ld4l.org/Work")
+#instances_pattern = pattern_escape("http://draft.ld4l.org/Instance")
+#people_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person") 
+#organizations_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person")
+works_pattern = pattern_escape("http://bibframe.org/vocab/Work")
+instances_pattern = pattern_escape("http://bibframe.org/vocab/Instance")
+people_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person") 
+organizations_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person")
+
+pattern = "/(#{works_pattern}|#{instances_pattern}|#{people_pattern}|#{organizations_pattern})> . *$/"
+#pattern = "/#{works_pattern}>/"
+
+Ld4lLinkDataGenerator::ListUris::ListUris.new('ld4l_list_works_instances_agents', pattern).run

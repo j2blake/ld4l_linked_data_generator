@@ -21,6 +21,10 @@ require "ld4l_link_data_generator/uri_discoverer"
 require "ld4l_link_data_generator/uri_processor"
 require "ld4l_link_data_generator/version"
 
+def pattern_escape(string)
+  string.gsub('/', '\\/').gsub('.', '\\.')
+end
+
 module Kernel
   def bogus(message)
     puts(">>>>>>>>>>>>>BOGUS #{message}")

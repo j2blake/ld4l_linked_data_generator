@@ -17,7 +17,8 @@ module Ld4lLinkDataGenerator
   class LinkedDataCreator
     USAGE_TEXT = 'Usage: ld4l_create_lod_files <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>'
     BATCH_SIZE = 1000
-    def process_arguments(args)
+    def process_arguments()
+      args = Array.new(ARGV)
       @restart = args.delete('RESTART')
       replace_report = args.delete('REPLACE')
 
@@ -28,7 +29,7 @@ module Ld4lLinkDataGenerator
       raise UserInputError.new("#{args[1]} already exists -- specify REPLACE") if File.exist?(args[1]) unless replace_report
       raise UserInputError.new("Can't create #{args[1]}: no parent directory.") unless Dir.exist?(File.dirname(args[1]))
       @report = Report.new('ld4l_create_lod_files', File.expand_path(args[1]))
-      @report.log_header(args)
+      @report.log_header(ARGV)
 
       @pairtree_prefix = args[2]
     end
@@ -105,7 +106,7 @@ module Ld4lLinkDataGenerator
     end
 
     def setup()
-      process_arguments(ARGV)
+      process_arguments
       connect_triple_store
       connect_pairtree
       initialize_bookmark

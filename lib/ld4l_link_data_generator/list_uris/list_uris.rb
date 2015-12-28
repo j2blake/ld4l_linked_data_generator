@@ -17,7 +17,11 @@ Finally, split the big file into smaller segments.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_list_uris <source_dir> <output_dir> [RESTART] <report_file> [REPLACE]
+Usage: <process_name> <source_dir> <output_dir> [RESTART] <report_file> [REPLACE] [PARTITION <ways>]
+
+The calling routine passes 'ld4l_list_uris' or other name to the
+constructor, along with a string version of a regexp, for awk to use when
+selecting triples.
 
 --------------------------------------------------------------------------------
 =end
@@ -25,17 +29,32 @@ Usage: ld4l_list_uris <source_dir> <output_dir> [RESTART] <report_file> [REPLACE
 module Ld4lLinkDataGenerator
   module ListUris
     class ListUris
-      USAGE_TEXT = 'Usage: ld4l_list_uris <source_dir> <output_dir> [OVERWRITE] <report_file> [REPLACE]'
-      LOCAL_URI_PREFIX = 'http://ld4l.library.cornell.edu/'
-      #      LOCAL_URI_PREFIX = 'http://draft.ld4l.org/'
       MERGE_BATCH_SIZE = 40
       SPLIT_FILE_SIZE = 100000
+      def initialize(process_name, triple_matcher)
+        @usage_text = 'Usage: #{process_name} <source_dir> <output_dir> [OVERWRITE] <report_file> [REPLACE] [PARTITION <ways>]'
+        @process_name = process_name
+        @triple_matcher = triple_matcher
+      end
+
       def process_arguments()
-        args = ARGV
+        args = Array.new(ARGV)
         @overwrite = args.delete('OVERWRITE')
         replace_report = args.delete('REPLACE')
 
-        raise UserInputError.new(USAGE_TEXT) unless args && args.size == 3
+        if partition_arg = args.index('PARTITION')
+          begin
+            args.delete_at(partition_arg)
+            @partitions = args.delete_at(partition_arg).to_i
+            raise UserInputError.new("PARTION must split more than 0 ways.") unless @partitions > 0
+          rescue
+            raise UserInputError.new(@usage_text)
+          end
+        else
+          @partitions = nil
+        end
+
+        raise UserInputError.new(@usage_text) unless args && args.size == 3
 
         @source_dir = File.expand_path(args[0])
         raise UserInputError.new("#{args[0]} does not exist.") unless File.exist?(args[0])
@@ -46,8 +65,8 @@ module Ld4lLinkDataGenerator
 
         raise UserInputError.new("#{args[2]} already exists -- specify REPLACE.") if File.exist?(args[2]) unless replace_report
         raise UserInputError.new("Can't create #{args[2]}: no parent directory.") unless Dir.exist?(File.dirname(args[2]))
-        @report = Ld4lLinkDataGenerator::ListUris::Report.new('ld4l_list_uris', File.expand_path(args[2]))
-        @report.log_header(args)
+        @report = Ld4lLinkDataGenerator::ListUris::Report.new(@process_name, File.expand_path(args[2]))
+        @report.log_header(ARGV)
       end
 
       def prepare_target
@@ -72,7 +91,7 @@ module Ld4lLinkDataGenerator
       def process_first_pass_file(path)
         new_filename = path[@source_dir.size..-1].gsub('/', '__')
         output_file = File.join(@first_pass_dir, new_filename)
-        `awk '/^<#{pattern_escape(LOCAL_URI_PREFIX)}/ { gsub(/[<>]/, "", $1); print $1}' #{path} | sort -u > #{output_file}`
+        `awk '#{@triple_matcher} { gsub(/[<>]/, "", $1); print $1}' #{path} | sort -u > #{output_file}`
         @report.first_pass_file(new_filename)
       end
 
@@ -115,20 +134,47 @@ module Ld4lLinkDataGenerator
       end
 
       def split
-        split_dir = File.join(@output_dir, 'splits')
-        Dir.mkdir(split_dir) unless File.exist?(split_dir)
-        Dir.chdir(split_dir) do
+        @split_dir = File.join(@output_dir, 'splits')
+        Dir.mkdir(@split_dir) unless File.exist?(@split_dir)
+        Dir.chdir(@split_dir) do
           `split -a4 -l #{SPLIT_FILE_SIZE} #{@last_merge_file} split_`
         end
         @report.logit("Split pass complete")
       end
 
-      def report
-        @report.logit ("BOGUS REPORT")
+      def partition
+        if @partitions
+          make_partition_directories
+          move_to_partitions
+          remove_split_directory
+          @report.partition_complete(@partition_directories)
+        else
+          @report.logit("No partition requested.")
+        end
       end
 
-      def pattern_escape(string)
-        string.gsub('/', '\\/').gsub('.', '\\.')
+      def make_partition_directories()
+        @partition_directories = []
+        1.upto(@partitions) do |i|
+          dir = File.join(@output_dir, "partition_#{i}")
+          Dir.mkdir(dir)
+          @partition_directories << dir
+        end
+      end
+
+      def move_to_partitions()
+        count = 0
+        Dir.chdir(@split_dir) do
+          Dir.foreach('.') do |fn|
+            next unless fn.start_with?('split_')
+            `mv #{fn} #{@partition_directories[count % @partitions]}`
+            count += 1
+          end
+        end
+      end
+
+      def remove_split_directory
+        Dir.delete(@split_dir)
       end
 
       def run
@@ -138,7 +184,7 @@ module Ld4lLinkDataGenerator
           first_pass
           merge_passes
           split
-          report
+          partition
         rescue UserInputError, IllegalStateError
           puts
           puts "ERROR: #{$!}"

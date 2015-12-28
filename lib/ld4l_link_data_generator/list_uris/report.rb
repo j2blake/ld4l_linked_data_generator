@@ -70,6 +70,10 @@ module Ld4lLinkDataGenerator
       def merge_passes_summary(last_file)
         logit "Merge passes complete: merged file is: #{last_file}"
       end
+      
+      def partition_complete(dirs)
+        logit "Partitioned into \n   #{dirs.join"\n   "}"
+      end
 
       def close()
         @file.close if @file

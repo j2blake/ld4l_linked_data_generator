@@ -15,11 +15,12 @@ any non-local URIs, sort and remove duplicates.
 Next: do a successive operation merging batches of files until only one large 
 file remains.
 
-Finally, split the big file into smaller segments.
+Finally, split the big file into smaller segments. If requested, partition the
+split segments into multiple sub-directories.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_list_uris <source_dir> <output_dir> [RESTART] <report_file> [REPLACE]
+Usage: ld4l_list_uris <source_dir> <output_dir> [RESTART] <report_file> [REPLACE] [PARTITION <ways>]
 
 --------------------------------------------------------------------------------
 =end
@@ -33,4 +34,9 @@ require 'ld4l_link_data_generator.rb'
 # ---------------------------------------------------------
 #
 
-Ld4lLinkDataGenerator::ListUris::ListUris.new.run
+LOCAL_URI_PREFIX = 'http://ld4l.library.cornell.edu/'
+#LOCAL_URI_PREFIX = 'http://draft.ld4l.org/'
+
+pattern = "/^<#{pattern_escape(LOCAL_URI_PREFIX)}/"
+
+Ld4lLinkDataGenerator::ListUris::ListUris.new('ld4l_list_all_uris', pattern).run
