@@ -39,6 +39,7 @@ module Ld4lLinkDataGenerator
       m = "#{Time.new.strftime('%Y-%m-%d %H:%M:%S')} #{message}"
       puts m
       @file.puts m
+      @file.flush
     end
 
     def log_header(args)
