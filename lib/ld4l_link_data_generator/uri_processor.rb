@@ -103,12 +103,16 @@ module Ld4lLinkDataGenerator
     end
 
     def run()
-      if (uri_is_acceptable)
-        build_the_graph
-        write_it_out
-        @report.wrote_it(@uri, @graph)
-      else
-        @report.bad_uri(@uri)
+      begin
+        if (uri_is_acceptable)
+          build_the_graph
+          write_it_out
+          @report.wrote_it(@uri, @graph)
+        else
+          @report.bad_uri(@uri)
+        end
+      rescue
+        @report.uri_failed(@uri, $!)
       end
     end
   end

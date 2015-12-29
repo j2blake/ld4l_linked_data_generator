@@ -17,6 +17,7 @@ Clears it at the end.
 module Ld4lLinkDataGenerator
   class Report
     attr_reader :bad_uri_count
+    attr_reader :failed_uri_count
     attr_reader :good_uri_count
     attr_reader :triples_count
     def initialize(main_routine, path)
@@ -24,6 +25,7 @@ module Ld4lLinkDataGenerator
       @file = File.open(path, 'w')
 
       @bad_uri_count = 0
+      @failed_uri_count = 0
       @good_uri_count = 0
       @triples_count = 0
       @largest_graph = 0
@@ -76,8 +78,14 @@ module Ld4lLinkDataGenerator
       announce_progress
     end
 
+    def uri_failed(uri, e)
+      @failed_uri_count += 1
+      logit("URI failed: '#{uri}' #{e}")
+      announce_progress
+    end
+
     def announce_progress
-      count = @bad_uri_count + @good_uri_count
+      count = @bad_uri_count + @failed_uri_count + @good_uri_count
       logit("Processed #{count} URIs.") if 0 == count % 1000
     end
 
@@ -85,7 +93,7 @@ module Ld4lLinkDataGenerator
       first = bookmark.start[:filename]
       first = 'FIRST' if first.empty?
       last = bookmark.filename
-      how_many = @bad_uri_count + @good_uri_count
+      how_many = @bad_uri_count + @failed_uri_count + @good_uri_count
       if status == :complete
         logit("Generated for URIs from %s to %s: processed %d URIs." % [first, last, how_many])
       elsif status == :interrupted
@@ -96,7 +104,7 @@ module Ld4lLinkDataGenerator
     end
 
     def stats()
-      message = "Valid URIs: %d, Invalid URIs %d, Triples: %d" % [@good_uri_count, @bad_uri_count, @triples_count]
+      message = "Valid URIs: %d, Invalid URIs %d, Failed URIs %d, Triples: %d" % [@good_uri_count, @bad_uri_count, @failed_uri_count, @triples_count]
       if (@good_uri_count > 0)
         average_size = @triples_count / @good_uri_count
         message << "\nAverage graph size: %d, " % [average_size]
