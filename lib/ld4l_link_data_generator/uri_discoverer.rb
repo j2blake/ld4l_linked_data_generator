@@ -1,55 +1,51 @@
 =begin
 --------------------------------------------------------------------------------
 
-Repeatedly get bunches of URIs for Agents, Instances, and Works. Dispense them
-one at a time.
+Repeatedly get bunches of URIs from the list files. Dispense them one at a time.
 
-The query should return the uris in ?uri, and should not contain an OFFSET or
-LIMIT, since they will be added here.
-
-Increments the offset in the bookmark, and periodically writes it to disk.
-Clears it at the end.
+As each new file is opened, persist the bookmark.
 
 --------------------------------------------------------------------------------
 =end
 
 module Ld4lLinkDataGenerator
   class UriDiscoverer
-    QUERY_URIS = <<-END
-      SELECT DISTINCT ?uri
-      WHERE { 
-        ?uri ?p ?o . 
-      }
-    END
-    def initialize(ts, bookmark, limit, report)
+    def initialize(ts, source_dir, bookmark, report)
       @ts = ts
-      @limit = limit
+      @source_dir = source_dir
       @bookmark = bookmark
       @report = report
-      @uris = []
     end
 
     def each()
-      while true
-        if @uris.empty?
-          @bookmark.persist
-          replenish_buffer
+      Dir.chdir(@source_dir) do |d|
+        Dir.entries(d).sort.each do |fn|
+          next if skipping_to_bookmark(fn)
+          next if invalid_file(fn)
+          @bookmark.next_file(fn)
+          @report.next_file(fn)
+
+          File.foreach(fn) do |line|
+            line_number = $.
+            uri = line.split(' ')[0]
+            yield uri
+            @report.record_uri(uri, line_number, fn)
+          end
         end
-        return if @uris.empty?
-        yield @uris.shift
-        @bookmark.increment
       end
       @bookmark.clear
     end
 
-    def replenish_buffer()
-      @uris = find_uris("%s OFFSET %d LIMIT %d" % [QUERY_URIS, @bookmark.offset, @limit])
-      @report.logit("Find URIs:, offset: %d, limit: %d, found: %d" % [@bookmark.offset, @limit, @uris.size])
+    def skipping_to_bookmark(fn)
+      if @bookmark.filename.empty?
+        false
+      else
+        @bookmark.filename > fn
+      end
     end
-
-    def find_uris(query)
-      QueryRunner.new(query).select(@ts).map { |r| r['uri'] }
+    
+    def invalid_file(fn)
+      fn.start_with?('.') || File.directory?(fn)
     end
-
   end
 end

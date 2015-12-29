@@ -8,30 +8,32 @@ serialize it to the requested format.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_create_lod_files <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>
+Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>
 
 --------------------------------------------------------------------------------
 =end
 
 module Ld4lLinkDataGenerator
   class LinkedDataCreator
-    USAGE_TEXT = 'Usage: ld4l_create_lod_files <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>'
-    BATCH_SIZE = 1000
+    USAGE_TEXT = 'Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>'
     def process_arguments()
       args = Array.new(ARGV)
       @restart = args.delete('RESTART')
       replace_report = args.delete('REPLACE')
 
-      raise UserInputError.new(USAGE_TEXT) unless args && args.size == 3
+      raise UserInputError.new(USAGE_TEXT) unless args && args.size == 4
 
-      @pair_tree_base = File.expand_path(args[0])
+      raise UserInputError.new("#{args[0]} doesn't exist.") unless File.exist?(args[0])
+      @source_dir = File.expand_path(args[0])
 
-      raise UserInputError.new("#{args[1]} already exists -- specify REPLACE") if File.exist?(args[1]) unless replace_report
-      raise UserInputError.new("Can't create #{args[1]}: no parent directory.") unless Dir.exist?(File.dirname(args[1]))
-      @report = Report.new('ld4l_create_lod_files', File.expand_path(args[1]))
+      @pair_tree_base = File.expand_path(args[1])
+
+      raise UserInputError.new("#{args[2]} already exists -- specify REPLACE") if File.exist?(args[2]) unless replace_report
+      raise UserInputError.new("Can't create #{args[2]}: no parent directory.") unless Dir.exist?(File.dirname(args[2]))
+      @report = Report.new('ld4l_create_lod_files', File.expand_path(args[2]))
       @report.log_header(ARGV)
 
-      @pairtree_prefix = args[2]
+      @pairtree_prefix = args[3]
     end
 
     def connect_triple_store
@@ -51,7 +53,7 @@ module Ld4lLinkDataGenerator
     end
 
     def initialize_bookmark
-      @bookmark = Bookmark.new(@files, @restart)
+      @bookmark = Bookmark.new(File.basename(@source_dir), @files, @restart)
     end
 
     def trap_control_c
@@ -62,10 +64,9 @@ module Ld4lLinkDataGenerator
     end
 
     def iterate_through_uris
-      uris = UriDiscoverer.new(@ts, @bookmark, BATCH_SIZE, @report)
-
       puts "Beginning processing. Press ^c to interrupt."
-      uris.each do |uri|
+      @uris = UriDiscoverer.new(@ts, @source_dir, @bookmark, @report)
+      @uris.each do |uri|
         if @interrupted
           process_interruption
           break
@@ -111,8 +112,8 @@ module Ld4lLinkDataGenerator
       connect_pairtree
       initialize_bookmark
       trap_control_c
-      
-      @report.record_counts(Counts.new(@ts))
+#
+#      @report.record_counts(Counts.new(@ts))
     end
 
     def run

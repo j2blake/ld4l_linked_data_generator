@@ -10,7 +10,7 @@ serialize it to the requested format.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_create_lod_files <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>
+Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>
 
 --------------------------------------------------------------------------------
 =end

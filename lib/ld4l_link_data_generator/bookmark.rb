@@ -8,41 +8,52 @@ Maintain a bookmark file at the root of the PairTree structure.
 
 module Ld4lLinkDataGenerator
   class Bookmark
-    FILE_NAME = "bookmark_linked_data_creator.json"
-
+    attr_reader :filename
     attr_reader :offset
-    attr_reader :start_offset
-    def initialize(pairtree, restart)
-      @path = File.expand_path(FILE_NAME, pairtree.path)
+    attr_reader :start
+    def initialize(process_id, pairtree, restart)
+      bookmark_path = "bookmark_linked_data_generator_#{process_id}.json"
+      @path = File.expand_path(bookmark_path, pairtree.path)
 
       if File.exist?(@path) && !restart
-        @offset = load
+        @filename, @offset = load
       else
+        @filename = ''
         @offset = 0
         persist
       end
 
-      @start_offset = @offset
+      @start = map_it
     end
 
     def load()
       File.open(@path) do |f|
         map = JSON.load(f, nil, :symbolize_names => true)
-        map[:offset]
+        return map.values_at(:filename, :offset)
       end
     end
 
     def persist()
       File.open(@path, 'w') do |f|
-        map = {:offset => @offset}
-        JSON.dump(map, f)
+        JSON.dump(map_it, f)
       end
     end
-    
-    def increment()
-      @offset += 1
+
+    def map_it
+      {:filename => @filename, :offset => @offset}
+    end
+
+    def next_file(filename)
+      @offset = 0
+      @filename = filename
+      persist
     end
     
+    def set_offset(offset)
+      @offset = offset
+      persist
+    end
+
     def clear()
       File.delete(@path)
     end

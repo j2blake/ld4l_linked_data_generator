@@ -19,11 +19,10 @@ module Ld4lLinkDataGenerator
     attr_reader :bad_uri_count
     attr_reader :good_uri_count
     attr_reader :triples_count
-
     def initialize(main_routine, path)
       @main_routine = main_routine
       @file = File.open(path, 'w')
-      
+
       @bad_uri_count = 0
       @good_uri_count = 0
       @triples_count = 0
@@ -31,6 +30,9 @@ module Ld4lLinkDataGenerator
       @smallest_graph = 0
       @uri_of_largest_graph = "NO URIs"
       @uri_of_smallest_graph = "NO URIs"
+
+      @current_filename = 'NO FILE'
+      @current_line_number = 0
     end
 
     def logit(message)
@@ -43,8 +45,14 @@ module Ld4lLinkDataGenerator
       logit "#{@main_routine} #{args.join(' ')}"
     end
 
-    def record_counts(counts)
-      logit "%{name}: %{triples} triples, %{subjects} subjects." % counts.values
+    def next_file(filename)
+      logit("Opening file: " + filename)
+      @current_filename = filename
+      @current_line_number = 0
+    end
+
+    def record_uri(uri, line_number, filename)
+      @current_line_number = line_number
     end
 
     def wrote_it(uri, graph)
@@ -59,22 +67,30 @@ module Ld4lLinkDataGenerator
         @smallest_graph = graph.count
         @uri_of_smallest_graph = uri
       end
+      announce_progress
     end
 
     def bad_uri(uri)
       @bad_uri_count += 1
+      announce_progress
+    end
+
+    def announce_progress
+      count = @bad_uri_count + @good_uri_count
+      logit("Processed #{count} URIs.") if 0 == count % 1000
     end
 
     def summarize(bookmark, status)
-      first = bookmark.start_offset
-      last = bookmark.offset
-      how_many = last - first
+      first = bookmark.start[:filename]
+      first = 'FIRST' if first.empty?
+      last = bookmark.filename
+      how_many = @bad_uri_count + @good_uri_count
       if status == :complete
-        logit("Generated for URIs from offset %d to %d: processed %d URIs." % [first, last, how_many])
+        logit("Generated for URIs from %s to %s: processed %d URIs." % [first, last, how_many])
       elsif status == :interrupted
-        logit("Interrupted with offset %d -- started at %d: processed %d URIs." % [last, first, how_many])
+        logit("Interrupted in file %s -- started at %s: processed %d URIs." % [last, first, how_many])
       else
-        logit("Error with offset %d -- started at %d: processed %d URIs.  \n%s  \n%s" % [last, first, how_many, $!.inspect, $!.backtrace.join("\n")])
+        logit("Error in file %s -- started at %s: processed %d URIs.  \n%s  \n%s" % [last, first, how_many, $!.inspect, $!.backtrace.join("\n")])
       end
     end
 

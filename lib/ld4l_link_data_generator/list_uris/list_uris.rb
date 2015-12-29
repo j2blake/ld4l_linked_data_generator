@@ -32,7 +32,7 @@ module Ld4lLinkDataGenerator
       MERGE_BATCH_SIZE = 40
       SPLIT_FILE_SIZE = 100000
       def initialize(process_name, triple_matcher)
-        @usage_text = 'Usage: #{process_name} <source_dir> <output_dir> [OVERWRITE] <report_file> [REPLACE] [PARTITION <ways>]'
+        @usage_text = "Usage: #{process_name} <source_dir> <output_dir> [OVERWRITE] <report_file> [REPLACE] [PARTITION <ways>]"
         @process_name = process_name
         @triple_matcher = triple_matcher
       end
