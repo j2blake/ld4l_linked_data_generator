@@ -48,10 +48,24 @@ module Ld4lLinkDataGenerator
       logit "#{@main_routine} #{args.join(' ')}"
     end
 
+    def log_bookmark(bookmark)
+      if bookmark.filename.empty?
+        logit "No bookmark: starting from the beginning."
+      elsif bookmark.complete?
+        logit "Bookmark says we already completed this process."
+      else
+        logit "Starting from the bookmark: filename=%s, offset=%d" % [bookmark.filename, bookmark.offset]
+      end
+    end
+
     def next_file(filename)
       logit("Opening file: " + filename)
       @current_filename = filename
       @current_line_number = 0
+    end
+    
+    def start_at_bookmark(filename, line)
+      logit("Starting at line #{line} in #{filename}")
     end
 
     def record_uri(uri, line_number, filename)
@@ -87,6 +101,10 @@ module Ld4lLinkDataGenerator
     def announce_progress
       count = @bad_uri_count + @failed_uri_count + @good_uri_count
       logit("Processed #{count} URIs.") if 0 == count % 1000
+    end
+
+    def nothing_to_do
+      logit("The bookmark says that processing is complete.")
     end
 
     def summarize(bookmark, status)

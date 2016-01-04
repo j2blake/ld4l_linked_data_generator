@@ -16,10 +16,9 @@ module Ld4lLinkDataGenerator
       @path = File.expand_path(bookmark_path, pairtree.path)
 
       if File.exist?(@path) && !restart
-        @filename, @offset = load
+        load
       else
-        @filename = ''
-        @offset = 0
+        reset
         persist
       end
 
@@ -29,8 +28,16 @@ module Ld4lLinkDataGenerator
     def load()
       File.open(@path) do |f|
         map = JSON.load(f, nil, :symbolize_names => true)
-        return map.values_at(:filename, :offset)
+        @filename = map[:filename] || ''
+        @offset = map[:offset] || 0
+        @complete = map[:complete] || false
       end
+    end
+
+    def reset
+      @filename = ''
+      @offset = 0
+      @complete = false
     end
 
     def persist()
@@ -40,18 +47,27 @@ module Ld4lLinkDataGenerator
     end
 
     def map_it
-      {:filename => @filename, :offset => @offset}
+      {:filename => @filename, :offset => @offset, :complete => @complete}
     end
 
-    def next_file(filename)
-      @offset = 0
+    def update(filename, offset)
+      @offset = offset
       @filename = filename
       persist
     end
-    
+
     def set_offset(offset)
       @offset = offset
       persist
+    end
+
+    def complete()
+      @complete = true
+      persist
+    end
+
+    def complete?
+      @complete
     end
 
     def clear()

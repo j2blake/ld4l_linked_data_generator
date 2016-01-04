@@ -54,6 +54,7 @@ module Ld4lLinkDataGenerator
 
     def initialize_bookmark
       @bookmark = Bookmark.new(File.basename(@source_dir), @files, @restart)
+      @report.log_bookmark(bookmark)
     end
 
     def trap_control_c
