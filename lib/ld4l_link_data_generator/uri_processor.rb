@@ -75,6 +75,7 @@ module Ld4lLinkDataGenerator
       @files = files
       @report = report
       @uri = uri
+      @digest = Digest::XXHash.new(64)
     end
 
     def uri_is_acceptable
@@ -100,8 +101,9 @@ module Ld4lLinkDataGenerator
       end
     end
     
-    def hash_of(value)
-      Digest::XXHash.new(64).digest(value).to_s(16)
+     def hash_of(value)
+      @digest.reset
+      @digest.digest(value).to_s(16)
     end
 
     def run()
