@@ -6,70 +6,46 @@ stats, and writing an N3 file.
 
 --------------------------------------------------------------------------------
 =end
-
 require "ruby-xxhash"
 
 module Ld4lLinkDataGenerator
   class UriProcessor
-    QUERY_OUTGOING_PROPERTIES = <<-END
+    QUERY_OUTGOING = <<-END
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     CONSTRUCT {
-      ?uri ?p ?o
+      ?uri ?p ?o .
     }
     WHERE { 
       ?uri ?p ?o . 
+      ?o a ?type .
+      ?o rdfs:label ?label . 
+      OPTIONAL {
+        ?o a ?type .
+      } 
+      OPTIONAL {
+        ?o rdfs:label ?label . 
+      } 
     }
     END
 
-    QUERY_OUTGOING_TYPES = <<-END
-    CONSTRUCT { 
-      ?o a ?type . 
-    }
-    WHERE {
-      ?uri ?p ?o .
-      ?o a ?type . 
-    }
-    END
-
-    QUERY_OUTGOING_LABELS = <<-END
+    QUERY_INCOMING = <<-END
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    CONSTRUCT { 
-      ?o rdfs:label ?label . 
-    }
-    WHERE {
-      ?uri ?p ?o .
-      ?o rdfs:label ?label . 
-    }
-    END
-
-    QUERY_INCOMING_PROPERTIES = <<-END
     CONSTRUCT {
-      ?s ?p ?uri
-    }
-    WHERE { 
-      ?s ?p ?uri . 
-    }
-    END
-
-    QUERY_INCOMING_TYPES = <<-END
-    CONSTRUCT { 
-      ?s a ?type . 
-    }
-    WHERE {
       ?s ?p ?uri .
       ?s a ?type . 
-    }
-    END
-
-    QUERY_INCOMING_LABELS = <<-END
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    CONSTRUCT { 
       ?s rdfs:label ?label . 
     }
-    WHERE {
-        ?s ?p ?uri .
+    WHERE { 
+      ?s ?p ?uri .
+      OPTIONAL {
+        ?s a ?type . 
+      } 
+      OPTIONAL {
         ?s rdfs:label ?label . 
+      } 
     }
     END
+    #
     def initialize(ts, files, report, uri)
       @ts = ts
       @files = files
@@ -84,12 +60,8 @@ module Ld4lLinkDataGenerator
 
     def build_the_graph
       @graph = RDF::Graph.new
-      @graph << QueryRunner.new(QUERY_OUTGOING_PROPERTIES).bind_uri('uri', @uri).construct(@ts)
-      @graph << QueryRunner.new(QUERY_OUTGOING_TYPES).bind_uri('uri', @uri).construct(@ts)
-      @graph << QueryRunner.new(QUERY_OUTGOING_LABELS).bind_uri('uri', @uri).construct(@ts)
-      @graph << QueryRunner.new(QUERY_INCOMING_PROPERTIES).bind_uri('uri', @uri).construct(@ts)
-      @graph << QueryRunner.new(QUERY_INCOMING_TYPES).bind_uri('uri', @uri).construct(@ts)
-      @graph << QueryRunner.new(QUERY_INCOMING_LABELS).bind_uri('uri', @uri).construct(@ts)
+      @graph << QueryRunner.new(QUERY_OUTGOING).bind_uri('uri', @uri).construct(@ts)
+      @graph << QueryRunner.new(QUERY_INCOMING).bind_uri('uri', @uri).construct(@ts)
     end
 
     def write_it_out
@@ -100,8 +72,8 @@ module Ld4lLinkDataGenerator
         writer << @graph
       end
     end
-    
-     def hash_of(value)
+
+    def hash_of(value)
       @digest.reset
       @digest.digest(value).to_s(16)
     end
