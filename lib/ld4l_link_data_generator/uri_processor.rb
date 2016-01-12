@@ -7,7 +7,7 @@ stats, and writing an N3 file.
 --------------------------------------------------------------------------------
 =end
 
-require "ruby-xxHash"
+require "ruby-xxhash"
 
 module Ld4lLinkDataGenerator
   class UriProcessor
