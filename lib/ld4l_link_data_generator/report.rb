@@ -49,7 +49,7 @@ module Ld4lLinkDataGenerator
     end
 
     def log_bookmark(bookmark)
-      if bookmark.filename.empty?
+      if bookmark.filename.empty? && !bookmark.complete?
         logit "No bookmark: starting from the beginning."
       elsif bookmark.complete?
         logit "Bookmark says we already completed this process."
