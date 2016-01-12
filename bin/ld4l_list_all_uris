@@ -34,8 +34,8 @@ require 'ld4l_link_data_generator.rb'
 # ---------------------------------------------------------
 #
 
-LOCAL_URI_PREFIX = 'http://ld4l.library.cornell.edu/'
-#LOCAL_URI_PREFIX = 'http://draft.ld4l.org/'
+#LOCAL_URI_PREFIX = 'http://ld4l.library.cornell.edu/'
+LOCAL_URI_PREFIX = 'http://draft.ld4l.org/'
 
 pattern = "/^<#{pattern_escape(LOCAL_URI_PREFIX)}/"
 

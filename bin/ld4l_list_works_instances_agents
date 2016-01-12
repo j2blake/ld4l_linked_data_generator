@@ -32,14 +32,17 @@ require 'ld4l_link_data_generator.rb'
 # MAIN ROUTINE
 # ---------------------------------------------------------
 #
-#works_pattern = pattern_escape("http://draft.ld4l.org/Work")
-#instances_pattern = pattern_escape("http://draft.ld4l.org/Instance")
-#people_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person") 
-#organizations_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person")
-works_pattern = pattern_escape("http://bibframe.org/vocab/Work")
-instances_pattern = pattern_escape("http://bibframe.org/vocab/Instance")
+# NEW WAY
+works_pattern = pattern_escape("http://bib.ld4l.org/ontology/Work")
+instances_pattern = pattern_escape("http://bib.ld4l.org/ontology/Instance")
 people_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person") 
-organizations_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person")
+organizations_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Organization")
+
+# OLD WAY
+#works_pattern = pattern_escape("http://bibframe.org/vocab/Work")
+#instances_pattern = pattern_escape("http://bibframe.org/vocab/Instance")
+#people_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Person") 
+#organizations_pattern = pattern_escape("http://xmlns.com/foaf/0.1/Organization")
 
 pattern = "/(#{works_pattern}|#{instances_pattern}|#{people_pattern}|#{organizations_pattern})> . *$/"
 #pattern = "/#{works_pattern}>/"
