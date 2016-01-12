@@ -7,6 +7,8 @@ stats, and writing an N3 file.
 --------------------------------------------------------------------------------
 =end
 
+require "ruby-xxHash"
+
 module Ld4lLinkDataGenerator
   class UriProcessor
     QUERY_OUTGOING_PROPERTIES = <<-END
@@ -90,16 +92,16 @@ module Ld4lLinkDataGenerator
     end
 
     def write_it_out
-      if @files.exists?(@uri)
-        obj = @files.get(@uri)
-      else
-        obj = @files.mk(@uri)
-      end
-
-      path = File.expand_path('linked_data.ttl', @files.path_for(@uri))
+      hashed = hash_of(@uri)
+      path = @files.path_for(hashed) + ".ttl"
+      FileUtils.makedirs(File.dirname(path))
       RDF::Writer.open(path) do |writer|
         writer << @graph
       end
+    end
+    
+    def hash_of(value)
+      Digest::XXHash.new(64).digest(value).to_s(16)
     end
 
     def run()
