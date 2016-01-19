@@ -1,7 +1,7 @@
 =begin rdoc
 --------------------------------------------------------------------------------
 
-Maintain a bookmark file at the root of the PairTree structure.
+Maintain a bookmark file at the root of the nested directory structure.
 
 --------------------------------------------------------------------------------
 =end
@@ -11,9 +11,9 @@ module Ld4lLinkDataGenerator
     attr_reader :filename
     attr_reader :offset
     attr_reader :start
-    def initialize(process_id, pairtree, restart)
+    def initialize(process_id, files, restart)
       bookmark_path = "bookmark_linked_data_generator_#{process_id}.json"
-      @path = File.expand_path(bookmark_path, pairtree.path)
+      @path = File.join(files.path, 'bookmarks', bookmark_path)
 
       if File.exist?(@path) && !restart
         load

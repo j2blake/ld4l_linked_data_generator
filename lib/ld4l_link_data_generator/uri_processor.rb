@@ -54,10 +54,6 @@ module Ld4lLinkDataGenerator
       @digest = Digest::XXHash.new(64)
     end
 
-    def uri_is_acceptable
-      @uri.start_with?(@files.prefix)
-    end
-
     def build_the_graph
       @graph = RDF::Graph.new
       @graph << QueryRunner.new(QUERY_OUTGOING).bind_uri('uri', @uri).construct(@ts)
@@ -65,8 +61,7 @@ module Ld4lLinkDataGenerator
     end
 
     def write_it_out
-      hashed = hash_of(@uri)
-      path = @files.path_for(hashed) + ".ttl"
+      path = @files.path_for(@uri) + ".ttl"
       FileUtils.makedirs(File.dirname(path))
       RDF::Writer.open(path) do |writer|
         writer << @graph
@@ -80,7 +75,7 @@ module Ld4lLinkDataGenerator
 
     def run()
       begin
-        if (uri_is_acceptable)
+        if (@files.acceptable?(@uri))
           build_the_graph
           write_it_out
           @report.wrote_it(@uri, @graph)

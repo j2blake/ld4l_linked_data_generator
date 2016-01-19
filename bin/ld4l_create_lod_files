@@ -4,13 +4,13 @@
 --------------------------------------------------------------------------------
 
 Generate files of Linked Open Data from the triple-store, for the LOD server. 
-The files are created in a PairTree directory, in N3 format. When servicing a 
-request, the server will read the file into a graph, add document triples, and
-serialize it to the requested format.
+The files are created in a nested directory structure, in TTL format. When 
+servicing a request, the server will read the file into a graph, add document 
+triples, and serialize it to the requested format.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>
+Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <uri_prefix>
 
 --------------------------------------------------------------------------------
 =end

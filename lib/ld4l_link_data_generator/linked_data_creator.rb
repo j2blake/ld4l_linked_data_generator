@@ -1,21 +1,21 @@
 =begin rdoc
 --------------------------------------------------------------------------------
 
-Generate files of Linked Open Data from the triple-store, for the LOD server.
-The files are created in a PairTree directory, in N3 format. When servicing a
-request, the server will read the file into a graph, add document triples, and
-serialize it to the requested format.
+Generate files of Linked Open Data from the triple-store, for the LOD server. 
+The files are created in a nested directory structure, in TTL format. When 
+servicing a request, the server will read the file into a graph, add document 
+triples, and serialize it to the requested format.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>
+Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <uri_prefix>
 
 --------------------------------------------------------------------------------
 =end
 
 module Ld4lLinkDataGenerator
   class LinkedDataCreator
-    USAGE_TEXT = 'Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <pairtree_prefix>'
+    USAGE_TEXT = 'Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <uri_prefix>'
     def process_arguments()
       args = Array.new(ARGV)
       @restart = args.delete('RESTART')
@@ -26,14 +26,14 @@ module Ld4lLinkDataGenerator
       raise UserInputError.new("#{args[0]} doesn't exist.") unless File.exist?(args[0])
       @source_dir = File.expand_path(args[0])
 
-      @pair_tree_base = File.expand_path(args[1])
+      @file_system_base = File.expand_path(args[1])
 
       raise UserInputError.new("#{args[2]} already exists -- specify REPLACE") if File.exist?(args[2]) unless replace_report
       raise UserInputError.new("Can't create #{args[2]}: no parent directory.") unless Dir.exist?(File.dirname(args[2]))
       @report = Report.new('ld4l_create_lod_files', File.expand_path(args[2]))
       @report.log_header(ARGV)
 
-      @pairtree_prefix = args[3]
+      @uri_prefix = args[3]
     end
 
     def connect_triple_store
@@ -47,9 +47,9 @@ module Ld4lLinkDataGenerator
       @report.logit("Connected to triple-store: #{@ts}")
     end
 
-    def connect_pairtree
-      @files = Pairtree.at(@pair_tree_base, :prefix => @pairtree_prefix, :create => true)
-      @report.logit("Connected to pairtree at #{@pair_tree_base}")
+    def connect_file_system
+      @files = FileSystem.new(@file_system_base, @uri_prefix)
+      @report.logit("Connected to file system at #{@file_system_base}")
     end
 
     def initialize_bookmark
@@ -110,7 +110,7 @@ module Ld4lLinkDataGenerator
     def setup()
       process_arguments
       connect_triple_store
-      connect_pairtree
+      connect_file_system
       initialize_bookmark
       trap_control_c
 #

@@ -5,12 +5,12 @@ require 'triple_store_controller'
 
 require 'fileutils'
 require 'find'
-require 'pairtree'
 require 'rdf'
 require 'rdf/raptor'
 
 require "ld4l_link_data_generator/bookmark"
 require "ld4l_link_data_generator/counts"
+require "ld4l_link_data_generator/file_system"
 require "ld4l_link_data_generator/linked_data_creator"
 require "ld4l_link_data_generator/list_uris/list_uris"
 require "ld4l_link_data_generator/list_uris/report"
