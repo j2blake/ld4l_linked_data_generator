@@ -35,6 +35,8 @@ module Ld4lLinkDataGenerator
 
       @current_filename = 'NO FILE'
       @current_line_number = 0
+      
+      reset_consistent_failure_count
     end
 
     def logit(message)
@@ -84,20 +86,32 @@ module Ld4lLinkDataGenerator
         @smallest_graph = graph.count
         @uri_of_smallest_graph = uri
       end
+      reset_consistent_failure_count
       announce_progress
     end
 
     def bad_uri(uri)
       @bad_uri_count += 1
+      check_for_consistent_failure
       announce_progress
     end
 
     def uri_failed(uri, e)
       @failed_uri_count += 1
       logit("URI failed: '#{uri}' #{e}")
+      check_for_consistent_failure
       announce_progress
     end
 
+    def reset_consistent_failure_count
+      @consistent_failure_count = 0
+    end
+    
+    def check_for_consistent_failure
+      @consistent_failure_count += 0
+      raise "Too many consistent failures" if @consistent_failure_count >= 5
+    end
+    
     def announce_progress
       count = @bad_uri_count + @failed_uri_count + @good_uri_count
       logit("Processed #{count} URIs.") if 0 == count % 1000
