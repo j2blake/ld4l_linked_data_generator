@@ -98,7 +98,7 @@ module Ld4lLinkDataGenerator
       source_dir = File.expand_path('../../void',__FILE__)
       Dir.chdir(source_dir) do |dir|
         Dir.foreach('.') do |filename|
-          FileUtils.cp(filename, @pair_tree_base) if filename.start_with? 'void'
+          FileUtils.cp(filename, @file_system_base) if filename.start_with? 'void'
         end
       end
     end

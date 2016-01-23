@@ -81,7 +81,7 @@ module Ld4lLinkDataGenerator
       [hash[-4, 2], hash[-2, 2]]
     end
 
-    ENCODE_REGEX = Regexp.compile("[\"*+,<=>?\\\\^|]|[^\x21-\x7e]", nil, 'u')
+    ENCODE_REGEX = Regexp.compile("[\"*+,<=>?\\\\^|]|[^\x21-\x7e]", nil)
 
     def encode(name)
       name.gsub(ENCODE_REGEX) { |c| char2hex(c) }.tr('/:.', '=+,')
