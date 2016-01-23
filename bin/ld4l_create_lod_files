@@ -10,7 +10,7 @@ triples, and serialize it to the requested format.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <uri_prefix>
+Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE]
 
 --------------------------------------------------------------------------------
 =end

@@ -8,20 +8,20 @@ triples, and serialize it to the requested format.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <uri_prefix>
+Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE]
 
 --------------------------------------------------------------------------------
 =end
 
 module Ld4lLinkDataGenerator
   class LinkedDataCreator
-    USAGE_TEXT = 'Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE] <uri_prefix>'
+    USAGE_TEXT = 'Usage: ld4l_create_lod_files <source_dir> <target_dir> [RESTART] <report_file> [REPLACE]'
     def process_arguments()
       args = Array.new(ARGV)
       @restart = args.delete('RESTART')
       replace_report = args.delete('REPLACE')
 
-      raise UserInputError.new(USAGE_TEXT) unless args && args.size == 4
+      raise UserInputError.new(USAGE_TEXT) unless args && args.size == 3
 
       raise UserInputError.new("#{args[0]} doesn't exist.") unless File.exist?(args[0])
       @source_dir = File.expand_path(args[0])
@@ -33,7 +33,7 @@ module Ld4lLinkDataGenerator
       @report = Report.new('ld4l_create_lod_files', File.expand_path(args[2]))
       @report.log_header(ARGV)
 
-      @uri_prefix = args[3]
+      @uri_prefix = 'http://draft.ld4l.org/'
     end
 
     def connect_triple_store
