@@ -12,28 +12,35 @@ module Ld4lLinkDataGenerator
   class UriProcessor
     QUERY_OUTGOING = <<-END
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     CONSTRUCT {
       ?uri ?p ?o .
+      ?o a ?type .
+      ?o rdfs:label ?label . 
+      ?o skos:prefLabel ?prefLabel . 
     }
     WHERE { 
       ?uri ?p ?o . 
-      ?o a ?type .
-      ?o rdfs:label ?label . 
       OPTIONAL {
         ?o a ?type .
       } 
       OPTIONAL {
         ?o rdfs:label ?label . 
       } 
+      OPTIONAL {
+        ?o skos:prefLabel ?prefLabel . 
+      } 
     }
     END
 
     QUERY_INCOMING = <<-END
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     CONSTRUCT {
       ?s ?p ?uri .
       ?s a ?type . 
       ?s rdfs:label ?label . 
+      ?s skos:prefLabel ?prefLabel . 
     }
     WHERE { 
       ?s ?p ?uri .
@@ -42,6 +49,9 @@ module Ld4lLinkDataGenerator
       } 
       OPTIONAL {
         ?s rdfs:label ?label . 
+      } 
+      OPTIONAL {
+        ?s skos:prefLabel ?prefLabel . 
       } 
     }
     END
