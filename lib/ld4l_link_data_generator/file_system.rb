@@ -62,7 +62,7 @@ module Ld4lLinkDataGenerator
         name = remove_prefix(uri)
         hash1, hash2 = hash_it(name)
         safe_name = encode(name)
-        File.join(@root_dir, hash1, hash2, safe_name)
+        File.join(@root_dir, hash1, hash2, safe_name + '.ttl')
       rescue
         bogus "Failed to build a path for '#{uri}': #{$!}\n    #{$!.backtrace.join('\n    ')}"
       end

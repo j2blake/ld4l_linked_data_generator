@@ -61,16 +61,11 @@ module Ld4lLinkDataGenerator
     end
 
     def write_it_out
-      path = @files.path_for(@uri) + ".ttl"
+      path = @files.path_for(@uri)
       FileUtils.makedirs(File.dirname(path))
       RDF::Writer.open(path) do |writer|
         writer << @graph
       end
-    end
-
-    def hash_of(value)
-      @digest.reset
-      @digest.digest(value).to_s(16)
     end
 
     def run()
