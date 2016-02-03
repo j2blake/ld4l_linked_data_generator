@@ -40,7 +40,7 @@ module Ld4lLinkDataGenerator
 
     def initialize(main_routine, path)
       @main_routine = main_routine
-      
+
       @file = File.open(path, 'w')
       @file.sync = true
       $stdout = MultiIO.new($stdout, @file)
@@ -57,7 +57,7 @@ module Ld4lLinkDataGenerator
 
       @current_filename = 'NO FILE'
       @current_line_number = 0
-      
+
       reset_consistent_failure_count
     end
 
@@ -84,7 +84,7 @@ module Ld4lLinkDataGenerator
       @current_filename = filename
       @current_line_number = 0
     end
-    
+
     def start_at_bookmark(filename, line)
       logit("Starting at line #{line} in #{filename}")
     end
@@ -125,12 +125,12 @@ module Ld4lLinkDataGenerator
     def reset_consistent_failure_count
       @consistent_failure_count = 0
     end
-    
+
     def check_for_consistent_failure
       @consistent_failure_count += 0
       raise "Too many consistent failures" if @consistent_failure_count >= 5
     end
-    
+
     def announce_progress
       count = @bad_uri_count + @failed_uri_count + @good_uri_count
       logit("Processed #{count} URIs.") if 0 == count % 1000
@@ -163,6 +163,22 @@ module Ld4lLinkDataGenerator
         message << "\n    largest: %d (%s)" % [@largest_graph, @uri_of_largest_graph]
       end
       logit(message)
+    end
+
+    def summarize_http_status(ts)
+      begin
+        return unless ts
+        
+        counts = ts.http_counts
+        return unless counts
+        
+        total = counts.reduce(0) {|sum, m| sum += m[1].values.reduce(0, :+)} 
+        return unless total > 0
+        
+        logit "http counts: #{counts.inspect}, total = #{total}"
+      rescue
+        logit "No HTTP status: #{$!}"
+      end
     end
 
     def close()

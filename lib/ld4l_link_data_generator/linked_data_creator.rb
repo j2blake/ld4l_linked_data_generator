@@ -1,9 +1,9 @@
 =begin rdoc
 --------------------------------------------------------------------------------
 
-Generate files of Linked Open Data from the triple-store, for the LOD server. 
-The files are created in a nested directory structure, in TTL format. When 
-servicing a request, the server will read the file into a graph, add document 
+Generate files of Linked Open Data from the triple-store, for the LOD server.
+The files are created in a nested directory structure, in TTL format. When
+servicing a request, the server will read the file into a graph, add document
 triples, and serialize it to the requested format.
 
 --------------------------------------------------------------------------------
@@ -113,8 +113,6 @@ module Ld4lLinkDataGenerator
       connect_file_system
       initialize_bookmark
       trap_control_c
-#
-#      @report.record_counts(Counts.new(@ts))
     end
 
     def run
@@ -128,7 +126,10 @@ module Ld4lLinkDataGenerator
         puts "ERROR: #{$!}"
         puts
       ensure
-        @report.close if @report
+        if @report
+          @report.summarize_http_status(@ts)
+          @report.close
+        end
       end
     end
   end
