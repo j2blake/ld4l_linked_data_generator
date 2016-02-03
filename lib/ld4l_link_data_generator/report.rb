@@ -20,9 +20,31 @@ module Ld4lLinkDataGenerator
     attr_reader :failed_uri_count
     attr_reader :good_uri_count
     attr_reader :triples_count
+    class MultiIO
+      def initialize(*targets)
+        @targets = targets
+      end
+
+      def write(*args)
+        @targets.each {|t| t.write(*args)}
+      end
+
+      def flush()
+        @targets.each(&:flush)
+      end
+
+      def close
+        @targets.each(&:close)
+      end
+    end
+
     def initialize(main_routine, path)
       @main_routine = main_routine
+      
       @file = File.open(path, 'w')
+      @file.sync = true
+      $stdout = MultiIO.new($stdout, @file)
+      $stderr = MultiIO.new($stderr, @file)
 
       @bad_uri_count = 0
       @failed_uri_count = 0
@@ -40,10 +62,7 @@ module Ld4lLinkDataGenerator
     end
 
     def logit(message)
-      m = "#{Time.new.strftime('%Y-%m-%d %H:%M:%S')} #{message}"
-      puts m
-      @file.puts m
-      @file.flush
+      puts "#{Time.new.strftime('%Y-%m-%d %H:%M:%S')} #{message}"
     end
 
     def log_header(args)
